@@ -45,10 +45,35 @@ Kirigami.ApplicationWindow {
         detailsDialog.open();
     }
 
+    function requestSelect(appId: string): void {
+        if (appId === controller.appId) {
+            root.pageStack.currentIndex = 1;
+            return;
+        }
+        if (controller.modified) {
+            discardDialog.pendingAppId = appId;
+            discardDialog.open();
+        } else {
+            selectApp(appId);
+        }
+    }
+
     function selectApp(appId: string): void {
         controller.appId = appId;
         // On narrow layouts, reveal the permissions column.
         root.pageStack.currentIndex = 1;
+    }
+
+    Kirigami.PromptDialog {
+        id: discardDialog
+        property string pendingAppId
+        title: i18nc("@title", "Unsaved changes")
+        subtitle: i18n("You have unsaved changes. Discard them and switch applications?")
+        standardButtons: QQC2.Dialog.Discard | QQC2.Dialog.Cancel
+        onDiscarded: {
+            close();
+            root.selectApp(discardDialog.pendingAppId);
+        }
     }
 
     Component {
@@ -85,10 +110,7 @@ Kirigami.ApplicationWindow {
                         subtitle: appDelegate.isGlobal ? i18n("Default settings for all apps") : appDelegate.appId
                     }
 
-                    onClicked: {
-                        appList.currentIndex = index;
-                        root.selectApp(appId);
-                    }
+                    onClicked: root.requestSelect(appId)
                 }
 
                 Kirigami.PlaceholderMessage {

@@ -29,6 +29,33 @@ QString joinSorted(const QStringList &tokens)
     return copy.join(QLatin1Char(';'));
 }
 
+// Split a filesystem token like "~/games:ro" into its access mode and path.
+// A missing/unknown suffix means read-write (flatpak's default).
+bool isFsMode(const QString &s)
+{
+    return s == QLatin1String("ro") || s == QLatin1String("rw") || s == QLatin1String("create");
+}
+QString fsModeOf(const QString &token)
+{
+    const int idx = token.lastIndexOf(QLatin1Char(':'));
+    if (idx > 0 && isFsMode(token.mid(idx + 1))) {
+        return token.mid(idx + 1);
+    }
+    return QStringLiteral("rw");
+}
+QString fsPathOf(const QString &token)
+{
+    const int idx = token.lastIndexOf(QLatin1Char(':'));
+    if (idx > 0 && isFsMode(token.mid(idx + 1))) {
+        return token.left(idx);
+    }
+    return token;
+}
+QString fsToken(const QString &path, const QString &mode)
+{
+    return (mode.isEmpty() || mode == QLatin1String("rw")) ? path : path + QLatin1Char(':') + mode;
+}
+
 // Normalise a KeyFile to a canonical string so two override sets can be
 // compared regardless of group/key/token ordering.
 QString normalize(const KeyFile &kf)
@@ -52,6 +79,23 @@ QString normalize(const KeyFile &kf)
 PermissionsController::PermissionsController(QObject *parent)
     : QAbstractListModel(parent)
 {
+}
+
+QVariantList PermissionsController::categories() const
+{
+    QVariantList list;
+    for (const CategoryDef &cat : catalog()) {
+        if (cat.type == RowType::Portal && isGlobal()) {
+            continue; // portals are not applicable to the global override file
+        }
+        list.append(QVariantMap{
+            {QStringLiteral("id"), cat.id},
+            {QStringLiteral("title"), cat.title},
+            {QStringLiteral("description"), cat.description},
+            {QStringLiteral("type"), static_cast<int>(cat.type)},
+        });
+    }
+    return list;
 }
 
 bool PermissionsController::isFilesystemPreset(const QString &bareToken)
@@ -319,7 +363,8 @@ void PermissionsController::rebuild()
                 Row r;
                 r.catIndex = i;
                 r.kind = PathEntry;
-                r.primary = t;
+                r.primary = fsPathOf(t);
+                r.secondary = fsModeOf(t);
                 r.removable = true;
                 r.entryId = m_nextEntryId++;
                 m_rows.append(r);
@@ -730,7 +775,7 @@ KeyFile PermissionsController::buildOverrides() const
             QSet<QString> desired;
             for (const Row &r : m_rows) {
                 if (r.catIndex == i && !r.primary.trimmed().isEmpty()) {
-                    desired.insert(r.primary.trimmed());
+                    desired.insert(fsToken(r.primary.trimmed(), r.secondary));
                 }
             }
             // Port of filesystemsOther.updateFromProxyProperty (presets separated).
@@ -832,6 +877,33 @@ KeyFile PermissionsController::buildOverrides() const
         QStringList tokens = it.value();
         tokens.removeDuplicates();
         kf.setValue(group, key, tokens.join(QLatin1Char(';')));
+    }
+
+    // Preserve any keys we do not model (e.g. newer flatpak options, or entries
+    // written by other tools) so saving never drops data. We claim the six
+    // Context keys and the whole Environment / bus-policy groups; everything else
+    // is copied through verbatim from what was on disk.
+    static const QSet<QString> claimedContextKeys = {
+        QStringLiteral("shared"),
+        QStringLiteral("sockets"),
+        QStringLiteral("devices"),
+        QStringLiteral("features"),
+        QStringLiteral("filesystems"),
+        QStringLiteral("persistent"),
+    };
+    static const QSet<QString> claimedGroups = {
+        QStringLiteral("Environment"),
+        QStringLiteral("Session Bus Policy"),
+        QStringLiteral("System Bus Policy"),
+    };
+    for (const QString &group : m_savedSnapshot.groups()) {
+        const bool wholeGroupClaimed = claimedGroups.contains(group);
+        for (const QString &key : m_savedSnapshot.keys(group)) {
+            const bool claimed = wholeGroupClaimed || (group == QStringLiteral("Context") && claimedContextKeys.contains(key));
+            if (!claimed) {
+                kf.setValue(group, key, m_savedSnapshot.value(group, key));
+            }
+        }
     }
 
     return kf;
