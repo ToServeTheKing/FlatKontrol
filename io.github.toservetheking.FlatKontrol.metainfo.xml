@@ -61,6 +61,16 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.2.0" date="2026-07-01">
+      <description>
+        <ul>
+          <li>Preserve override keys that are not modelled, so saving never drops data</li>
+          <li>Ask before discarding unsaved changes when switching applications</li>
+          <li>Native FormCard layout for the permission list</li>
+          <li>Filesystem entries now have an access-mode selector and a folder browser</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-06-30">
       <description>
         <p>Initial release.</p>

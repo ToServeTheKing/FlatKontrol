@@ -11,6 +11,7 @@
 #include <QQmlEngine>
 #include <QSet>
 #include <QString>
+#include <QVariantList>
 
 /**
  * Owns the editable permission state for one application (or the global
@@ -34,6 +35,8 @@ class PermissionsController : public QAbstractListModel
     Q_PROPERTY(bool isGlobal READ isGlobal NOTIFY appIdChanged)
     Q_PROPERTY(bool modified READ modified NOTIFY modifiedChanged)
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY canUndoChanged)
+    // One entry per visible category: {id, title, description, type}.
+    Q_PROPERTY(QVariantList categories READ categories NOTIFY appIdChanged)
 
 public:
     enum RowKind {
@@ -119,6 +122,7 @@ public:
     {
         return m_canUndo;
     }
+    QVariantList categories() const;
 
     // --- Editing API, called from QML ---
     Q_INVOKABLE void setToggleValue(int row, bool value);

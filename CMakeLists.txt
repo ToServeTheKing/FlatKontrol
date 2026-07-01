@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 
-project(flatkontrol VERSION 0.1.0 LANGUAGES CXX)
+project(flatkontrol VERSION 0.2.0 LANGUAGES CXX)
 
 set(REQUIRED_QT_VERSION 6.6.0)
 set(REQUIRED_KF_VERSION 6.5.0)
@@ -30,6 +30,7 @@ find_package(Qt6 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS
     Quick
     QuickControls2
     DBus
+    Test
 )
 
 find_package(KF6 ${REQUIRED_KF_VERSION} REQUIRED COMPONENTS
@@ -46,6 +47,10 @@ ecm_setup_version(${PROJECT_VERSION}
 )
 
 add_subdirectory(src)
+
+if(BUILD_TESTING)
+    add_subdirectory(autotests)
+endif()
 
 install(PROGRAMS io.github.toservetheking.FlatKontrol.desktop
         DESTINATION ${KDE_INSTALL_APPDIR})
