@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: CC0-1.0 -->
+<component type="desktop-application">
+  <id>io.github.toservetheking.FlatKontrol</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>FlatKontrol</name>
+  <summary>Manage Flatpak permissions</summary>
+
+  <keywords>
+    <keyword>flatpak</keyword>
+    <keyword>sandbox</keyword>
+    <keyword>permissions</keyword>
+    <keyword>overrides</keyword>
+    <keyword>flatseal</keyword>
+  </keywords>
+
+  <description>
+    <p>
+      FlatKontrol is a Kirigami application for reviewing and changing the
+      permissions of installed Flatpak applications. It edits the same override
+      files as Flatpak's own tooling, so changes apply system-wide.
+    </p>
+    <p>It can manage:</p>
+    <ul>
+      <li>Shared subsystems (network, IPC)</li>
+      <li>Sockets, devices and extra features</li>
+      <li>Filesystem access, including custom paths and persistent directories</li>
+      <li>Environment variables</li>
+      <li>Session and system D-Bus name policies</li>
+      <li>Dynamic portal permissions</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">io.github.toservetheking.FlatKontrol.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/toservetheking/FlatKontrol/main/screenshots/main.png</image>
+      <caption>Reviewing and adjusting an application's permissions</caption>
+    </screenshot>
+  </screenshots>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#7fc7ee</color>
+    <color type="primary" scheme_preference="dark">#2b6cb0</color>
+  </branding>
+
+  <url type="homepage">https://github.com/toservetheking/FlatKontrol</url>
+  <url type="bugtracker">https://github.com/toservetheking/FlatKontrol/issues</url>
+
+  <provides>
+    <binary>flatkontrol</binary>
+  </provides>
+
+  <developer id="io.github.toservetheking">
+    <name>toservetheking</name>
+  </developer>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.1.0" date="2026-06-30">
+      <description>
+        <p>Initial release.</p>
+      </description>
+    </release>
+  </releases>
+</component>
