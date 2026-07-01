@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=FlatKontrol
+GenericName=Flatpak Permissions
+Comment=Manage Flatpak permissions
+Icon=io.github.toservetheking.FlatKontrol
+Exec=flatkontrol
+Terminal=false
+Categories=Qt;KDE;Settings;
+Keywords=flatpak;sandbox;permissions;flatseal;
+StartupWMClass=flatkontrol
