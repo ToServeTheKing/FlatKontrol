@@ -46,7 +46,9 @@ jobs:
         env:
           FLATPAK_GPG_PRIVATE_KEY: ${{ secrets.FLATPAK_GPG_PRIVATE_KEY }}
         run: |
-          export GNUPGHOME="$GITHUB_WORKSPACE/.gnupg"
+          # Keep the keyring OUT of the workspace: the manifest's dir source
+          # copies the checkout, and gpg-agent sockets are "special files".
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
           mkdir -p "$GNUPGHOME"; chmod 700 "$GNUPGHOME"
           printf '%s\n' "$FLATPAK_GPG_PRIVATE_KEY" | gpg --batch --import
           FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/{print $10; exit}')
