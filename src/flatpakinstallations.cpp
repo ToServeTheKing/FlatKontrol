@@ -11,10 +11,15 @@
 
 FlatpakInstallations::FlatpakInstallations()
 {
+    // When we ourselves run inside a flatpak, XDG_DATA_HOME points at this app's
+    // private data, not the host. flatpak exposes the real values as HOST_*; use
+    // them so we discover the host's user installation (and write overrides there).
+    const bool sandboxed = QFileInfo::exists(QStringLiteral("/.flatpak-info"));
+
     // User installation.
     m_userPath = envOr("FLATPAK_USER_DIR", QString());
     if (m_userPath.isEmpty()) {
-        QString dataHome = qEnvironmentVariable("XDG_DATA_HOME");
+        QString dataHome = sandboxed ? qEnvironmentVariable("HOST_XDG_DATA_HOME") : qEnvironmentVariable("XDG_DATA_HOME");
         if (dataHome.isEmpty()) {
             dataHome = QDir::homePath() + QStringLiteral("/.local/share");
         }
@@ -38,7 +43,11 @@ QString FlatpakInstallations::envOr(const char *name, const QString &fallback)
 
 QStringList FlatpakInstallations::customInstallationPaths() const
 {
-    const QString configPath = envOr("FLATPAK_CONFIG_DIR", QStringLiteral("/etc/flatpak"));
+    QString configPath = envOr("FLATPAK_CONFIG_DIR", QString());
+    if (configPath.isEmpty()) {
+        // In a sandbox the host's /etc is at /run/host/etc.
+        configPath = QFileInfo::exists(QStringLiteral("/.flatpak-info")) ? QStringLiteral("/run/host/etc/flatpak") : QStringLiteral("/etc/flatpak");
+    }
     const QString dirPath = configPath + QStringLiteral("/installations.d");
 
     QDir dir(dirPath);
