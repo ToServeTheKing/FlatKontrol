@@ -42,24 +42,40 @@ jobs:
           print(s)
           PY
 
-      - name: Build repo and bundle
+      - name: Import GPG signing key
+        env:
+          FLATPAK_GPG_PRIVATE_KEY: ${{ secrets.FLATPAK_GPG_PRIVATE_KEY }}
+        run: |
+          export GNUPGHOME="$GITHUB_WORKSPACE/.gnupg"
+          mkdir -p "$GNUPGHOME"; chmod 700 "$GNUPGHOME"
+          printf '%s\n' "$FLATPAK_GPG_PRIVATE_KEY" | gpg --batch --import
+          FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/{print $10; exit}')
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          echo "GPG_FPR=$FPR" >> "$GITHUB_ENV"
+
+      - name: Build repo and bundle (signed)
         run: |
           flatpak-builder --user --disable-rofiles-fuse --force-clean \
             --default-branch=stable --repo=repo \
+            --gpg-sign="$GPG_FPR" --gpg-homedir="$GNUPGHOME" \
             builddir io.github.toservetheking.FlatKontrol.yml
-          flatpak build-update-repo repo --generate-static-deltas
+          flatpak build-update-repo repo --generate-static-deltas \
+            --gpg-sign="$GPG_FPR" --gpg-homedir="$GNUPGHOME"
           flatpak build-bundle repo \
             io.github.toservetheking.FlatKontrol.flatpak \
-            io.github.toservetheking.FlatKontrol stable
+            io.github.toservetheking.FlatKontrol stable \
+            --gpg-sign="$GPG_FPR" --gpg-homedir="$GNUPGHOME"
 
       - name: Add repo landing page and .flatpakrepo
         run: |
-          cat > repo/flatkontrol.flatpakrepo <<'EOF'
+          GPGKEY=$(gpg --homedir "$GNUPGHOME" --export "$GPG_FPR" | base64 -w0)
+          cat > repo/flatkontrol.flatpakrepo <<EOF
           [Flatpak Repo]
           Title=FlatKontrol
           Url=https://toservetheking.github.io/FlatKontrol/
           Homepage=https://github.com/toservetheking/FlatKontrol
           Description=Manage Flatpak permissions
+          GPGKey=$GPGKEY
           EOF
           cat > repo/index.html <<'EOF'
           <!doctype html>
@@ -67,7 +83,7 @@ jobs:
           <title>FlatKontrol Flatpak repository</title>
           <h1>FlatKontrol</h1>
           <p>Add the repository and install:</p>
-          <pre>flatpak remote-add --if-not-exists --user --no-gpg-verify flatkontrol https://toservetheking.github.io/FlatKontrol/flatkontrol.flatpakrepo
+          <pre>flatpak remote-add --if-not-exists --user flatkontrol https://toservetheking.github.io/FlatKontrol/flatkontrol.flatpakrepo
           flatpak install --user flatkontrol io.github.toservetheking.FlatKontrol</pre>
           <p>Or download the single-file bundle from the
           <a href="https://github.com/toservetheking/FlatKontrol/releases">Releases page</a>.</p>

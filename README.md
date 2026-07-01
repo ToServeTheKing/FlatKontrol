@@ -27,12 +27,13 @@ Tagged releases are built by CI into a single-file bundle (attached to each
 [GitHub Release]) and a hosted Flatpak repository on GitHub Pages:
 
 ```sh
-flatpak remote-add --if-not-exists --user --no-gpg-verify flatkontrol \
+flatpak remote-add --if-not-exists --user flatkontrol \
   https://toservetheking.github.io/FlatKontrol/flatkontrol.flatpakrepo
 flatpak install --user flatkontrol io.github.toservetheking.FlatKontrol
 ```
 
-(The repository is currently unsigned, hence `--no-gpg-verify`.)
+The repository and bundle are GPG-signed; the public key is embedded in the
+`.flatpakrepo` (and available at [`keys/flatkontrol.asc`](keys/flatkontrol.asc)).
 
 Or install the downloaded bundle directly:
 
