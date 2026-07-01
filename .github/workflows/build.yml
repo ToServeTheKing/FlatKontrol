@@ -67,7 +67,7 @@ jobs:
           <title>FlatKontrol Flatpak repository</title>
           <h1>FlatKontrol</h1>
           <p>Add the repository and install:</p>
-          <pre>flatpak remote-add --if-not-exists --user flatkontrol https://toservetheking.github.io/FlatKontrol/flatkontrol.flatpakrepo
+          <pre>flatpak remote-add --if-not-exists --user --no-gpg-verify flatkontrol https://toservetheking.github.io/FlatKontrol/flatkontrol.flatpakrepo
           flatpak install --user flatkontrol io.github.toservetheking.FlatKontrol</pre>
           <p>Or download the single-file bundle from the
           <a href="https://github.com/toservetheking/FlatKontrol/releases">Releases page</a>.</p>
