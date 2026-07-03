@@ -1,5 +1,7 @@
 # FlatKontrol
 
+![FlatKontrol](screenshots/main.png)
+
 A Flatpak permissions manager built the KDE way - C++ with a QML/Kirigami
 frontend, ECM/CMake, and KDE Frameworks 6. Think [Flatseal], reimagined as if
 the team behind [Elisa] had written it.
@@ -51,7 +53,8 @@ toolchain. On Arch/CachyOS:
 ```sh
 sudo pacman -S --needed cmake extra-cmake-modules base-devel \
     qt6-base qt6-declarative kirigami kirigami-addons \
-    ki18n kcoreaddons kiconthemes kcrash kdbusaddons kitemmodels qqc2-desktop-style
+    ki18n kcoreaddons kiconthemes kcrash kdbusaddons kitemmodels \
+    kcolorscheme qqc2-desktop-style
 ```
 
 Then:
@@ -70,6 +73,7 @@ cmake --build build
 - `permissioncatalog.{h,cpp}` - the static catalog of categories and options.
 - `portalsbackend.{h,cpp}` - QtDBus PermissionStore client.
 - `permissionscontroller.{h,cpp}` - per-app state, resolution, and the row model.
+- `appcolorscheme.{h,cpp}` - QML-facing wrapper around `KColorSchemeManager` for the Preferences page.
 - `qml/` - Kirigami UI.
 
 [Flatseal]: https://github.com/tchx84/Flatseal

@@ -8,6 +8,7 @@ path = [
     "io.github.toservetheking.FlatKontrol.desktop",
     "keys/*.asc",
     "screenshots/*",
+    "icons/*.png",
 ]
 SPDX-License-Identifier = "GPL-3.0-or-later"
 SPDX-FileCopyrightText = "ToServeTheKing <austin@thebennett.net>"

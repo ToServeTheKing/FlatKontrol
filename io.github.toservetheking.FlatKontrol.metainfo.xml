@@ -61,6 +61,16 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.2.2" date="2026-07-03">
+      <description>
+        <ul>
+          <li>Add a Preferences page with a color-scheme switcher</li>
+          <li>Add an About page</li>
+          <li>Ship a full hicolor icon set instead of a single scalable SVG</li>
+          <li>Match KDE System Settings' Audio page layout for the permission list</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.2.1" date="2026-07-03">
       <description>
         <ul>

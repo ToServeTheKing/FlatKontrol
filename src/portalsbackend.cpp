@@ -1,4 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+    SPDX-FileCopyrightText: 2026 ToServeTheKing <austin@thebennett.net>
+
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 #include "portalsbackend.h"
 
 #include <KLocalizedString>
@@ -8,9 +13,6 @@
 #include <QDBusInterface>
 #include <QDBusMessage>
 #include <QDBusReply>
-
-namespace FlatKontrol
-{
 
 static constexpr uint SUPPORTED_SERVICE_VERSION = 2;
 static const char *DBUS_PATH = "/org/freedesktop/impl/portal/PermissionStore";
@@ -253,5 +255,3 @@ void PortalsBackend::reload()
     m_supported.clear();
     m_reasons.clear();
 }
-
-} // namespace FlatKontrol
