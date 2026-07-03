@@ -3,8 +3,8 @@
 ## Build
 
 FlatKontrol is a KDE/Kirigami application (C++20 + QML) built with CMake
-and Extra CMake Modules. See the README for the full list of system
-packages to install, then:
+and Extra CMake Modules. Install the Qt 6 and KDE Frameworks 6 development
+packages that `CMakeLists.txt` asks for, then:
 
 ```sh
 cmake -B build -G Ninja
@@ -31,8 +31,7 @@ release builds.
   an inline header — `.desktop`, `keys/*.asc`, `screenshots/*` — are
   covered instead by `REUSE.toml`.
 - `src/` is intentionally flat: one class per concern, no `models/`,
-  `controllers/`, or `viewmodels/` subfolders. See the README's
-  "Architecture" section for what each class owns.
+  `controllers/`, or `viewmodels/` subfolders.
 - C++ backend classes are exposed to QML via `QML_ELEMENT`; QML views are
   meant to stay thin renderers over that state, not hold logic themselves.
 

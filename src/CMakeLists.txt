@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 ToServeTheKing <austin@thebennett.net>
+#
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 add_executable(flatkontrol
@@ -15,11 +17,14 @@ qt_add_qml_module(flatkontrol
     QML_FILES
         qml/Main.qml
         qml/PermissionsPage.qml
+        qml/SettingsPage.qml
     SOURCES
         applicationsmodel.cpp
         applicationsmodel.h
         permissionscontroller.cpp
         permissionscontroller.h
+        appcolorscheme.cpp
+        appcolorscheme.h
 )
 
 target_include_directories(flatkontrol PRIVATE ${CMAKE_BINARY_DIR})
@@ -38,6 +43,8 @@ target_link_libraries(flatkontrol PRIVATE
     KF6::IconThemes
     KF6::Crash
     KF6::DBusAddons
+    KF6::ColorScheme
+    KF6::Kirigami
 )
 
 install(TARGETS flatkontrol ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

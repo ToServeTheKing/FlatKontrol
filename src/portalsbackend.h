@@ -1,4 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+    SPDX-FileCopyrightText: 2026 ToServeTheKing <austin@thebennett.net>
+
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 #pragma once
 
 #include <QHash>
@@ -7,9 +12,6 @@
 #include <QStringList>
 
 class QDBusInterface;
-
-namespace FlatKontrol
-{
 
 /// Tri-state (plus availability) of a portal permission, matching Flatseal.
 enum class PortalState {
@@ -71,5 +73,3 @@ private:
     QHash<QString, bool> m_supported; // property -> supported
     QHash<QString, QString> m_reasons; // property -> reason
 };
-
-} // namespace FlatKontrol

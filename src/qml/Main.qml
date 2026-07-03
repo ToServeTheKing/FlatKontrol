@@ -1,4 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+    SPDX-FileCopyrightText: 2026 ToServeTheKing <austin@thebennett.net>
+
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -7,6 +12,7 @@ import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 import org.kde.kitemmodels as KItemModels
 import org.kde.kirigamiaddons.delegates as Delegates
+import org.kde.kirigamiaddons.formcard as FormCard
 import io.github.toservetheking.FlatKontrol
 
 Kirigami.ApplicationWindow {
@@ -18,6 +24,44 @@ Kirigami.ApplicationWindow {
     minimumHeight: Kirigami.Units.gridUnit * 24
     width: Kirigami.Units.gridUnit * 48
     height: Kirigami.Units.gridUnit * 34
+
+    globalDrawer: Kirigami.GlobalDrawer {
+        isMenu: true
+        actions: [
+            Kirigami.Action {
+                text: i18nc("@action:inmenu", "Preferences…")
+                icon.name: "configure"
+                onTriggered: root.pageStack.pushDialogLayer(settingsPageComponent, {
+                    width: root.width
+                }, {
+                    width: Kirigami.Units.gridUnit * 24,
+                    height: Kirigami.Units.gridUnit * 20,
+                    modality: Qt.NonModal
+                })
+            },
+            Kirigami.Action {
+                text: i18nc("@action:inmenu", "About %1", root.title)
+                icon.name: "help-about"
+                onTriggered: root.pageStack.pushDialogLayer(aboutPageComponent, {
+                    width: root.width
+                }, {
+                    width: Kirigami.Units.gridUnit * 30,
+                    height: Kirigami.Units.gridUnit * 30,
+                    modality: Qt.NonModal
+                })
+            }
+        ]
+    }
+
+    Component {
+        id: aboutPageComponent
+        FormCard.AboutPage {}
+    }
+
+    Component {
+        id: settingsPageComponent
+        SettingsPage {}
+    }
 
     ApplicationsModel {
         id: appsModel

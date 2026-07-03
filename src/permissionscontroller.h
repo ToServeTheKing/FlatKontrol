@@ -1,4 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+    SPDX-FileCopyrightText: 2026 ToServeTheKing <austin@thebennett.net>
+
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 #pragma once
 
 #include "flatpakinstallations.h"
@@ -187,7 +192,7 @@ private:
     static bool isFilesystemPreset(const QString &bareToken);
 
     FlatpakInstallations m_installations;
-    FlatKontrol::PortalsBackend m_portals;
+    PortalsBackend m_portals;
 
     QString m_appId;
     QString m_appName;

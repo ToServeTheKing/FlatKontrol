@@ -1,6 +1,14 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+    SPDX-FileCopyrightText: 2026 ToServeTheKing <austin@thebennett.net>
+
+    SPDX-License-Identifier: GPL-3.0-or-later
+*/
+
 pragma ComponentBehavior: Bound
 
+// Styled after KDE System Settings' Audio page (plasma-pa's kcm/ui/main.qml):
+// Kirigami.ListSectionHeader per category, flat rows indented under the
+// header and separated by Kirigami.Separator, no card/border around them.
 import QtQuick
 import QtQuick.Controls as QQC2
 import QtQuick.Layouts
@@ -8,7 +16,6 @@ import QtQuick.Dialogs
 import Qt.labs.qmlmodels
 import org.kde.kirigami as Kirigami
 import org.kde.kitemmodels as KItemModels
-import org.kde.kirigamiaddons.formcard as FormCard
 import io.github.toservetheking.FlatKontrol
 
 Kirigami.ScrollablePage {
@@ -22,10 +29,12 @@ Kirigami.ScrollablePage {
 
     leftPadding: 0
     rightPadding: 0
-    topPadding: Kirigami.Units.gridUnit
+    // No topPadding: Kirigami.ListSectionHeader (the first thing on the
+    // page) already carries its own top padding, and stacking ours on top
+    // of that left an oversized gap above the first category.
     bottomPadding: Kirigami.Units.gridUnit
 
-    // A small status marker used across delegates.
+    // A small status marker used across rows.
     component StatusBadge: Kirigami.Icon {
         property int state: 0
         visible: state > 0
@@ -86,7 +95,7 @@ Kirigami.ScrollablePage {
     }
 
     ColumnLayout {
-        spacing: Kirigami.Units.largeSpacing
+        spacing: 0
         visible: page.hasSelection
 
         Repeater {
@@ -100,20 +109,29 @@ Kirigami.ScrollablePage {
                 Layout.fillWidth: true
                 spacing: 0
 
-                FormCard.FormHeader {
-                    title: section.modelData.title
+                Kirigami.ListSectionHeader {
+                    Layout.fillWidth: true
+                    text: section.modelData.title
                 }
 
-                FormCard.FormCard {
-                    KItemModels.KSortFilterProxyModel {
-                        id: catModel
-                        sourceModel: page.controller
-                        filterRoleName: "categoryId"
-                        // No category id is a substring of another, so this is an exact match.
-                        filterString: section.modelData.id
-                    }
+                KItemModels.KSortFilterProxyModel {
+                    id: catModel
+                    sourceModel: page.controller
+                    filterRoleName: "categoryId"
+                    // No category id is a substring of another, so this is an exact match.
+                    filterString: section.modelData.id
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Kirigami.Units.largeSpacing
+                    Layout.rightMargin: Kirigami.Units.largeSpacing
+                    Layout.topMargin: Kirigami.Units.smallSpacing
+                    Layout.bottomMargin: Kirigami.Units.smallSpacing
+                    spacing: Kirigami.Units.largeSpacing
 
                     Repeater {
+                        id: rowRepeater
                         model: catModel
 
                         delegate: DelegateChooser {
@@ -122,7 +140,7 @@ Kirigami.ScrollablePage {
                             // Toggle
                             DelegateChoice {
                                 roleValue: 0
-                                delegate: FormCard.FormSwitchDelegate {
+                                delegate: ColumnLayout {
                                     id: toggleD
                                     required property int index
                                     required property string label
@@ -130,18 +148,51 @@ Kirigami.ScrollablePage {
                                     required property bool value
                                     required property int status
                                     readonly property int sourceRow: catModel.mapToSource(catModel.index(index, 0)).row
-                                    text: label
-                                    description: example
-                                    checked: value
-                                    icon.name: status === 2 ? "document-edit-symbolic" : (status === 1 ? "globe-symbolic" : "")
-                                    onToggled: page.controller.setToggleValue(sourceRow, checked)
+                                    Layout.fillWidth: true
+                                    spacing: Kirigami.Units.smallSpacing
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: Kirigami.Units.smallSpacing
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 0
+                                            QQC2.Label {
+                                                Layout.fillWidth: true
+                                                text: toggleD.label
+                                                wrapMode: Text.Wrap
+                                            }
+                                            QQC2.Label {
+                                                Layout.fillWidth: true
+                                                text: toggleD.example
+                                                visible: text.length > 0
+                                                wrapMode: Text.Wrap
+                                                font: Kirigami.Theme.smallFont
+                                                color: Kirigami.Theme.disabledTextColor
+                                            }
+                                        }
+                                        StatusBadge {
+                                            state: toggleD.status
+                                        }
+                                        QQC2.Switch {
+                                            checked: toggleD.value
+                                            onToggled: page.controller.setToggleValue(toggleD.sourceRow, checked)
+                                        }
+                                    }
+
+                                    Kirigami.Separator {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: Kirigami.Units.smallSpacing
+                                        visible: toggleD.index !== rowRepeater.count - 1
+                                    }
                                 }
                             }
 
                             // Filesystem path (with access mode + Browse)
                             DelegateChoice {
                                 roleValue: 1
-                                delegate: FormCard.AbstractFormDelegate {
+                                delegate: ColumnLayout {
                                     id: fsD
                                     required property int index
                                     required property string value
@@ -149,7 +200,8 @@ Kirigami.ScrollablePage {
                                     required property int status
                                     required property bool removable
                                     readonly property int sourceRow: catModel.mapToSource(catModel.index(index, 0)).row
-                                    background: null
+                                    Layout.fillWidth: true
+                                    spacing: Kirigami.Units.smallSpacing
 
                                     FolderDialog {
                                         id: folderDialog
@@ -160,7 +212,8 @@ Kirigami.ScrollablePage {
                                         }
                                     }
 
-                                    contentItem: RowLayout {
+                                    RowLayout {
+                                        Layout.fillWidth: true
                                         spacing: Kirigami.Units.smallSpacing
                                         QQC2.TextField {
                                             id: fsField
@@ -190,21 +243,30 @@ Kirigami.ScrollablePage {
                                             onClicked: page.controller.removeEntry(fsD.sourceRow)
                                         }
                                     }
+
+                                    Kirigami.Separator {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: Kirigami.Units.smallSpacing
+                                        visible: fsD.index !== rowRepeater.count - 1
+                                    }
                                 }
                             }
 
                             // Persistent (home-relative) path
                             DelegateChoice {
                                 roleValue: 2
-                                delegate: FormCard.AbstractFormDelegate {
+                                delegate: ColumnLayout {
                                     id: relD
                                     required property int index
                                     required property string value
                                     required property int status
                                     required property bool removable
                                     readonly property int sourceRow: catModel.mapToSource(catModel.index(index, 0)).row
-                                    background: null
-                                    contentItem: RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: Kirigami.Units.smallSpacing
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
                                         spacing: Kirigami.Units.smallSpacing
                                         QQC2.TextField {
                                             text: relD.value
@@ -221,13 +283,19 @@ Kirigami.ScrollablePage {
                                             onClicked: page.controller.removeEntry(relD.sourceRow)
                                         }
                                     }
+
+                                    Kirigami.Separator {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: Kirigami.Units.smallSpacing
+                                        visible: relD.index !== rowRepeater.count - 1
+                                    }
                                 }
                             }
 
                             // Environment variable
                             DelegateChoice {
                                 roleValue: 3
-                                delegate: FormCard.AbstractFormDelegate {
+                                delegate: ColumnLayout {
                                     id: varD
                                     required property int index
                                     required property string value
@@ -235,8 +303,11 @@ Kirigami.ScrollablePage {
                                     required property int status
                                     required property bool removable
                                     readonly property int sourceRow: catModel.mapToSource(catModel.index(index, 0)).row
-                                    background: null
-                                    contentItem: RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: Kirigami.Units.smallSpacing
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
                                         spacing: Kirigami.Units.smallSpacing
                                         QQC2.TextField {
                                             text: varD.value
@@ -262,13 +333,19 @@ Kirigami.ScrollablePage {
                                             onClicked: page.controller.removeEntry(varD.sourceRow)
                                         }
                                     }
+
+                                    Kirigami.Separator {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: Kirigami.Units.smallSpacing
+                                        visible: varD.index !== rowRepeater.count - 1
+                                    }
                                 }
                             }
 
                             // D-Bus name policy
                             DelegateChoice {
                                 roleValue: 4
-                                delegate: FormCard.AbstractFormDelegate {
+                                delegate: ColumnLayout {
                                     id: busD
                                     required property int index
                                     required property string value
@@ -276,8 +353,11 @@ Kirigami.ScrollablePage {
                                     required property int status
                                     required property bool removable
                                     readonly property int sourceRow: catModel.mapToSource(catModel.index(index, 0)).row
-                                    background: null
-                                    contentItem: RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: Kirigami.Units.smallSpacing
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
                                         spacing: Kirigami.Units.smallSpacing
                                         QQC2.TextField {
                                             text: busD.value
@@ -299,13 +379,19 @@ Kirigami.ScrollablePage {
                                             onClicked: page.controller.removeEntry(busD.sourceRow)
                                         }
                                     }
+
+                                    Kirigami.Separator {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: Kirigami.Units.smallSpacing
+                                        visible: busD.index !== rowRepeater.count - 1
+                                    }
                                 }
                             }
 
                             // Portal (tri-state)
                             DelegateChoice {
                                 roleValue: 5
-                                delegate: FormCard.FormComboBoxDelegate {
+                                delegate: ColumnLayout {
                                     id: portalD
                                     required property int index
                                     required property string label
@@ -315,19 +401,51 @@ Kirigami.ScrollablePage {
                                     required property string unsupportedReason
                                     readonly property int sourceRow: catModel.mapToSource(catModel.index(index, 0)).row
                                     readonly property var states: [2, 4, 3]
-                                    text: label
-                                    description: supported ? example : unsupportedReason
-                                    enabled: supported
-                                    model: [i18n("Unset"), i18n("Allowed"), i18n("Disallowed")]
-                                    currentIndex: value === 4 ? 1 : (value === 3 ? 2 : 0)
-                                    onActivated: page.controller.setPortalValue(sourceRow, states[currentIndex])
+                                    Layout.fillWidth: true
+                                    spacing: Kirigami.Units.smallSpacing
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: Kirigami.Units.smallSpacing
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 0
+                                            QQC2.Label {
+                                                Layout.fillWidth: true
+                                                text: portalD.label
+                                                wrapMode: Text.Wrap
+                                                enabled: portalD.supported
+                                            }
+                                            QQC2.Label {
+                                                Layout.fillWidth: true
+                                                text: portalD.supported ? portalD.example : portalD.unsupportedReason
+                                                visible: text.length > 0
+                                                wrapMode: Text.Wrap
+                                                font: Kirigami.Theme.smallFont
+                                                color: Kirigami.Theme.disabledTextColor
+                                            }
+                                        }
+                                        QQC2.ComboBox {
+                                            enabled: portalD.supported
+                                            model: [i18n("Unset"), i18n("Allowed"), i18n("Disallowed")]
+                                            currentIndex: portalD.value === 4 ? 1 : (portalD.value === 3 ? 2 : 0)
+                                            onActivated: page.controller.setPortalValue(portalD.sourceRow, portalD.states[currentIndex])
+                                        }
+                                    }
+
+                                    Kirigami.Separator {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: Kirigami.Units.smallSpacing
+                                        visible: portalD.index !== rowRepeater.count - 1
+                                    }
                                 }
                             }
 
                             // "Add entry" affordance
                             DelegateChoice {
                                 roleValue: 6
-                                delegate: FormCard.FormButtonDelegate {
+                                delegate: QQC2.Button {
                                     id: addD
                                     required property string categoryId
                                     text: i18nc("@action", "Add…")
