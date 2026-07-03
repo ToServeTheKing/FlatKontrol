@@ -1,0 +1,13 @@
+version = 1
+SPDX-PackageName = "FlatKontrol"
+SPDX-PackageSupplier = "ToServeTheKing <austin@thebennett.net>"
+SPDX-PackageDownloadLocation = "https://github.com/toservetheking/FlatKontrol"
+
+[[annotations]]
+path = [
+    "io.github.toservetheking.FlatKontrol.desktop",
+    "keys/*.asc",
+    "screenshots/*",
+]
+SPDX-License-Identifier = "GPL-3.0-or-later"
+SPDX-FileCopyrightText = "ToServeTheKing <austin@thebennett.net>"
